@@ -40,7 +40,6 @@ int main() {
     string line;
     int counter = 0;
     while(getline(readDataset, line)) {
-        // double area, perimeter, majorAxisLength, minorAxisLength, aspectRatio, eccentricity, convexArea, equivDiameter, extent, solidity, roundness, compactness, shapeFactor1, shapeFactor2, shapeFactor3, shapeFactor4, beanClass;
         string tempString;
         vector<double> tempVector;
         stringstream inputString(line);
@@ -58,20 +57,10 @@ int main() {
             }
             
             getline(inputString, tempString, ',');
-            if (removeQuotes(tempString) == "SEKER") {
-                tempVector.push_back(double(0));
-            } else if (removeQuotes(tempString) == "BARBUNYA") {
-                tempVector.push_back(double(1));
-            } else if (removeQuotes(tempString) == "BOMBAY") {
-                tempVector.push_back(double(2));
-            } else if (removeQuotes(tempString) == "CALI") {
-                tempVector.push_back(double(3));
-            } else if (removeQuotes(tempString) == "HOROZ") {
-                tempVector.push_back(double(4));
-            } else if (removeQuotes(tempString) == "SIRA") {
-                tempVector.push_back(double(5));
-            } else if (removeQuotes(tempString) == "DERMASON") {
-                tempVector.push_back(double(6));
+            for (int i = 0; i < SPECIES_QUANTITY; ++i) {
+                if (species[i] == removeQuotes(tempString)) {
+                    tempVector.push_back(double(i));
+                }
             }
 
             lines.push_back(tempVector);
@@ -82,6 +71,7 @@ int main() {
     for (unsigned i = 0; i < header.size(); ++i) {
         cout << header[i] << " ";
     }
+    cout << endl;
 
     for (unsigned i = 0; i < lines.size(); ++i) {
         for (unsigned j = 0; j < lines[i].size(); ++j) {

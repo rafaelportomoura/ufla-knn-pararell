@@ -22,6 +22,13 @@ class point{
         point(){
             this->attributes = new double [QTD_ATTRIBUTES];
         }
+        point(std::vector<double> vet){
+
+            for(int i = 0; i < QTD_ATTRIBUTES; i++){
+                this->attributes[i] = vet[i];
+            }
+            this->type = vet[QTD_ATTRIBUTES];
+        }
 
         void set_attributes(double attributes[QTD_ATTRIBUTES]){
             this->attributes = attributes;
@@ -66,13 +73,15 @@ class list{
 
         void add(point new_neighbourd){
             double distance = this->pivo.calculate_distance(new_neighbourd);
-
-            if(this->my_list.size() == 0 || distance > this->my_list[this->my_list.size()].calculate_distance(pivo)){
+            int msize = this->my_list.size();
+            
+            if(this->my_list.size() == 0 || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
                 if(this->my_list.size() == this->num_neighbours){
                     this->my_list.pop_back();
                 }
                 this->incert_ordered_in_list(new_neighbourd);
             }
+
         }
 
         void incert_ordered_in_list(point new_neighbourd){
@@ -144,6 +153,7 @@ int main(){
     int porcentage = 70;
     int qtd_train = (lines.size()/10)*7;
     int pos_type = QTD_ATTRIBUTES;
+    int num_neighbours = 5;
 
     for(int i = 0; i < qtd_train; i++){
         
@@ -158,8 +168,46 @@ int main(){
         list_of_point.push_back(new_point);
         lines.erase(lines.begin());
     }
-    std::cout << "\n\n ------------------------------------------------ \n\n ";
-    for(int i = 0; i < list_of_point.size(); i++){
-        std::cout << i << "-"<<list_of_point[i].get_type() << "\t";
+
+
+
+
+    while(lines.size() > 0){
+
+        // std::cout << "\n\n ------------------------------------------------ \n\n ";
+        // for(int i = 0; i < lines.size(); i++){
+        //     std::cout << i << "-"<<lines[i][16] << "\t";
+        // }
+
+        std::vector<double> thos_line = lines[0];
+        list lista(num_neighbours);
+        point new_point(thos_line);
+        lines.erase(lines.begin());
+        lista.add_pivo(new_point);
+
+        for(int i = 0; i < list_of_point.size(); i++){
+            lista.add(list_of_point[i]);
+        }
+        lista.define_type();
+
+        
     }
+    /*  def test_algorithm(self):
+        test_nodes = self.make_nodes(self.test_population)
+        i = 0
+        for node in test_nodes:
+            minha_lista = Lista()
+            minha_lista.add_pivo(node)
+            for node in self.nodes:
+                minha_lista.adiciona(node)
+            minha_lista.define_specie()
+            
+            if minha_lista:
+                self.nodes.append(minha_lista.pivo)
+            if minha_lista.pivo.specie != self.test_population.get(["Species"]).iloc[i,0]:
+                print("DIFERENTE")
+            i += 1
+        
+    
+    */
 }

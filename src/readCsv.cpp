@@ -24,8 +24,7 @@ double removeQuotesAndAtof( string mStr ) {
 }
 
 int main() {
-
-    ifstream readDataset( "Dry_Bean_Dataset.csv" );
+    ifstream readDataset( "/home/knn/src/Dry_Bean_Dataset.csv" );
     string species[SPECIES_QUANTITY] = {
         "SEKER",
         "BARBUNYA",

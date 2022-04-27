@@ -9,6 +9,6 @@ esac
 
 echo $file_to_compile
 
-g++ "$(pwd)/src/$file_to_compile" -fopenmp 
+g++ "/home/knn/src/$file_to_compile" -fopenmp 
 
 ./a.out

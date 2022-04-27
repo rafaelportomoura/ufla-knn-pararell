@@ -6,25 +6,24 @@
 #include <algorithm>
 #include <typeinfo>
 
-using namespace std;
 
 #define SPECIES_QUANTITY 7
 #define PARAMETERS_QUANTITY 17
 
-string removeQuotes(string mStr) {
+std::string removeQuotes(std::string mStr) {
     mStr.erase(remove(mStr.begin(), mStr.end(), '"'), mStr.end());
     return mStr;
 }
 
-double removeQuotesAndAtof(string mStr) {
+double removeQuotesAndAtof(std::string mStr) {
     mStr.erase(remove(mStr.begin(), mStr.end(), '"'), mStr.end());
     return atof(mStr.c_str());
 }
 
-int readCsv(vector<vector<double>> &lines) {
+int readCsv(std::vector<std::vector<double>> &lines) {
 
-    ifstream readDataset ("Dry_Bean_Dataset.csv");
-    string species[SPECIES_QUANTITY] = {
+    std::ifstream readDataset ("Dry_Bean_Dataset.csv");
+    std::string species[SPECIES_QUANTITY] = {
         "SEKER",
         "BARBUNYA",
         "BOMBAY",
@@ -34,14 +33,14 @@ int readCsv(vector<vector<double>> &lines) {
         "DERMASON"
     };
 
-    vector<string> header;
+    std::vector<std::string> header;
 
-    string line;
+    std::string line;
     int counter = 0;
     while(getline(readDataset, line)) {
-        string tempString;
-        vector<double> tempVector;
-        stringstream inputString(line);
+        std::string tempString;
+        std::vector<double> tempVector;
+        std::stringstream inputString(line);
 
         if (counter == 0) {
             for (int i = 0; i < PARAMETERS_QUANTITY; ++i) {

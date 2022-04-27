@@ -8,7 +8,6 @@
 #include "readCsv.cpp"
 
 #define QTD_ATTRIBUTES 16
-using namespace std;
 
 struct type_info{
     int type;
@@ -33,7 +32,7 @@ class point{
         }
 
         int get_type(){
-            return type;
+            return this->type;
         }
 
         double get_attribute(int pos){
@@ -52,7 +51,7 @@ class point{
 
 class list{
     private:
-        vector<point> my_list;
+        std::vector<point> my_list;
         int num_neighbours;
         point pivo;
 
@@ -91,17 +90,17 @@ class list{
                 
             }
         }
-/*
+
         void define_type(){
-            vector<type_info> species_present;
+            std::vector<type_info> species_present;
 
             for (int i = 0; i < this->my_list.size(); i++){
-                int pos = this.pos(species_present, this->my_list[i].type);
+                int pos = this->pos(this->my_list[i].get_type(), species_present);
                 if( pos == -1){
                     type_info new_type_info;
-                    new_type_info.type = this->my_list[i].type;
+                    new_type_info.type = this->my_list[i].get_type();
                     new_type_info.qtd = 1;
-                    species_present.push_back(this->my_list[i].type);
+                    species_present.push_back(new_type_info);
                 }
                 else{
                     species_present[pos].qtd++;
@@ -117,7 +116,7 @@ class list{
 
         }
 
-        int pos(int target, vector<type_info> species_present){
+        int pos(int target, std::vector<type_info> species_present){
             for (int i = 0; i < species_present.size(); i++){
                 if(species_present[i].type == target){
                     return i;
@@ -125,7 +124,7 @@ class list{
             }
             return -1;
         }
-*/
+
         int count(int target){
             int qtd = 0;
             for (int i = 0; i < this->my_list.size(); i++){
@@ -138,8 +137,8 @@ class list{
 };
 
 int main(){
-    vector<point> list_of_point;
-    vector<vector<double>> lines;
+    std::vector<point> list_of_point;
+    std::vector<std::vector<double>> lines;
     readCsv(lines);
     random_shuffle(lines.begin(), lines.end());
     int porcentage = 70;
@@ -159,8 +158,8 @@ int main(){
         list_of_point.push_back(new_point);
         lines.erase(lines.begin());
     }
-    cout << "\n\n ------------------------------------------------ \n\n ";
+    std::cout << "\n\n ------------------------------------------------ \n\n ";
     for(int i = 0; i < list_of_point.size(); i++){
-        cout << i << "-"<<list_of_point[i].get_type() << " ";
+        std::cout << i << "-"<<list_of_point[i].get_type() << "\t";
     }
 }

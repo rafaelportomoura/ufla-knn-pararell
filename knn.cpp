@@ -78,7 +78,7 @@ class list{
             double distance = this->pivo.calculate_distance(new_neighbourd);
             int msize = this->my_list.size();
             
-            if(this->my_list.size() == 0 || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
+            if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
                 if(this->my_list.size() == this->num_neighbours){
                     this->my_list.pop_back();
                 }

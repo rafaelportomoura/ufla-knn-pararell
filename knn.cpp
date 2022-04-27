@@ -23,7 +23,7 @@ class point{
             this->attributes = new double [QTD_ATTRIBUTES];
         }
         point(std::vector<double> vet){
-
+            this->attributes = new double [QTD_ATTRIBUTES];
             for(int i = 0; i < QTD_ATTRIBUTES; i++){
                 this->attributes[i] = vet[i];
             }
@@ -76,7 +76,6 @@ class list{
 
         void add(point new_neighbourd){
             double distance = this->pivo.calculate_distance(new_neighbourd);
-            int msize = this->my_list.size();
             
             if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
                 if(this->my_list.size() == this->num_neighbours){
@@ -107,10 +106,20 @@ class list{
             std::vector<type_info> types_present;
 
             this->count_types(types_present);
+            this->filter_small_numbers(types_present);
 
+            if (types_present.size() == 1){
+                std::cout<<types_present[0].qtd<<"-"<<types_present[0].type<<"  ";
+                this->pivo.set_type(types_present[0].type);
+            }
+            else{
+                this->desempate(types_present);
+            }
+        }
+
+        void filter_small_numbers(std::vector<type_info> &types_present){
             int i = types_present.size()-1;
             int biggest_qtd = -1;
-            this->show_types(types_present);
             while(i>=0){
                 if(biggest_qtd < types_present[i].qtd){
                     biggest_qtd = types_present[i].qtd;
@@ -122,13 +131,16 @@ class list{
                 i--;
             }
 
-            if (types_present.size() == 1){
-                std::cout<<types_present[0].qtd<<"-"<<types_present[0].type;
-                this->pivo.set_type(types_present[0].type);
+            i = types_present.size()-1;
+            while(i>=0){
+                if(biggest_qtd > types_present[i].qtd){
+                    types_present.erase(types_present.begin() + i);
+                }
+                i--;
             }
 
-            else{
-                this->desempate(types_present);
+            if(types_present[types_present.size()-1].qtd < biggest_qtd){
+                types_present.erase(types_present.begin() + types_present.size()-1);
             }
         }
 
@@ -156,29 +168,37 @@ class list{
         }
 
         void desempate(std::vector<type_info> &types_present){
+            double* total_distances  = this->calculate_total_distances(types_present);
+            int closer = 0;
+            for(int i = 1; i < types_present.size(); i++){
+                if(total_distances[i] < total_distances[closer]){
+                    closer = i;
+                }
+            }
+            std::cout<<total_distances[closer]<<". ";
+            this->pivo.set_type(types_present[closer].type);
+
+            delete total_distances;
+            
+        }
+
+        double* calculate_total_distances(std::vector<type_info> types_present){
             int qtd_species = types_present.size();
-            double total_distance[qtd_species];
+            double* total_distances = new double [qtd_species];
+
             for(int i = 0; i < qtd_species; i++){
-                total_distance[i] = 0;
+                total_distances[i] = 0;
             }
 
             for(int i = 0; i < this->my_list.size(); i++){
                 for(int j = 0; j < types_present.size(); j++){
                     if(this->my_list[i].get_type() == types_present[j].type){
-                        total_distance[j] += this->pivo.calculate_distance(my_list[i]);
+                        total_distances[j] += this->pivo.calculate_distance(my_list[i]);
                     }
                 }
             }
 
-            int closer = 0;
-            for(int i = 1; i < types_present.size(); i++){
-                if(total_distance[i] < total_distance[closer]){
-                    closer = i;
-                }
-            }
-            std::cout<<total_distance[closer];
-            this->pivo.set_type(types_present[closer].type);
-            
+            return total_distances;
         }
 
         int pos(int target, std::vector<type_info> types_present){
@@ -192,31 +212,31 @@ class list{
 
 };
 
-void knn(int num_neighbours, int porcentage){
+std::vector<point> train(std::vector<std::vector<double>> &lines, int porcentage){
     std::vector<point> list_of_point;
-    std::vector<std::vector<double>> lines;
-    readCsv(lines);
-    random_shuffle(lines.begin(), lines.end());
+
     int qtd_train = (lines.size()/100)*porcentage;
-    int pos_type = QTD_ATTRIBUTES;
 
     for(int i = 0; i < qtd_train; i++){
-        
+
         double* att = new double [QTD_ATTRIBUTES];
         for(int j = 0; j < QTD_ATTRIBUTES - 1 ; j++){
             att[j] = lines[0][j];
         }
+
         point new_point;
         new_point.set_attributes(att);
-        int new_point_type = (int)lines[0][pos_type];
+        int new_point_type = (int)lines[0][QTD_ATTRIBUTES];
         new_point.set_type(new_point_type);
+
         list_of_point.push_back(new_point);
+
         lines.erase(lines.begin());
     }
+    return list_of_point;
+}
 
-
-
-
+void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_point, int num_neighbours){
     int diferente = 0, igual = 0;
     while(lines.size() > 0){
 
@@ -248,8 +268,19 @@ void knn(int num_neighbours, int porcentage){
     std::cout<<"diferente: " << diferente << " igual: " << igual << std::endl;
 }
 
+void knn(int num_neighbours, int porcentage){
+    std::vector<std::vector<double>> lines;
+    readCsv(lines);
+    random_shuffle(lines.begin(), lines.end());
+
+    std::vector<point> list_of_point = train(lines, porcentage);
+        std::cout<<"iuggggggggggggggggggggg";
+
+    test(lines, list_of_point, num_neighbours);
+
+}
+
 int main(){
-    knn(90, 95);
-    //std::cout<<"vai aparecer um segmentetion fault depois daqui, e eu não sei pq" << std::endl;
+    knn(120, 70);
     return 0;
 }

@@ -242,7 +242,7 @@ void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_p
         list lista(num_neighbours);
         point new_point(this_line);
         lines.erase(lines.begin());
-        lista.add_pivo(new_point);
+        lista.add_pivot(new_point);
 
         for(int i = 0; i < list_of_point.size(); i++){
             lista.add(list_of_point[i]);

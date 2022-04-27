@@ -21,7 +21,7 @@ double removeQuotesAndAtof(string mStr) {
     return atof(mStr.c_str());
 }
 
-int main() {
+int readCsv(vector<vector<double>> &lines) {
 
     ifstream readDataset ("Dry_Bean_Dataset.csv");
     string species[SPECIES_QUANTITY] = {
@@ -34,7 +34,6 @@ int main() {
         "DERMASON"
     };
 
-    vector<vector<double>> lines;
     vector<string> header;
 
     string line;
@@ -68,17 +67,6 @@ int main() {
         ++counter;
     }
 
-    for (unsigned i = 0; i < header.size(); ++i) {
-        cout << header[i] << " ";
-    }
-    cout << endl;
-
-    for (unsigned i = 0; i < lines.size(); ++i) {
-        for (unsigned j = 0; j < lines[i].size(); ++j) {
-            cout << lines[i][j] << " ";
-        }
-        cout << endl;
-    }
 
     return 0;
 }

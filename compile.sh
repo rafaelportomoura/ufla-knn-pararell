@@ -11,4 +11,4 @@ echo $file_to_compile
 
 g++ "$(pwd)/src/$file_to_compile" -fopenmp 
 
-./src/a.out
+./a.out

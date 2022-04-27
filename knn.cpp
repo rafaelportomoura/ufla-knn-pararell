@@ -59,7 +59,7 @@ class list{
     private:
         std::vector<point> my_list;
         int num_neighbours;
-        point pivo;
+        point pivot;
 
     public:
         list(int num_neighbours){
@@ -67,17 +67,17 @@ class list{
         }
 
         point get_pivo(){
-            return this->pivo;
+            return this->pivot;
         }
 
-        void add_pivot(point pivo){
-            this->pivo = pivo;
+        void add_pivot(point pivot){
+            this->pivot = pivot;
         }
 
         void add(point new_neighbour){
-            double distance = this->pivo.calculate_distance(new_neighbour);
+            double distance = this->pivot.calculate_distance(new_neighbour);
             
-            if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
+            if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivot)){
                 if(this->my_list.size() == this->num_neighbours){
                     this->my_list.pop_back();
                 }
@@ -88,9 +88,9 @@ class list{
 
         void insert_ordered(point new_neighbour){
             int i = this->my_list.size()-1;
-            double new_distance = this->pivo.calculate_distance(new_neighbour);
+            double new_distance = this->pivot.calculate_distance(new_neighbour);
             while(i >= 0){
-                if(new_distance > this->pivo.calculate_distance(this->my_list[i])){
+                if(new_distance > this->pivot.calculate_distance(this->my_list[i])){
                    this->my_list.insert(this->my_list.begin() + i+1 ,new_neighbour);
                    break;
                 }
@@ -109,11 +109,10 @@ class list{
             this->filter_small_numbers(types_present);
 
             if (types_present.size() == 1){
-                std::cout<<types_present[0].qtd<<"-"<<types_present[0].type<<"  ";
-                this->pivo.set_type(types_present[0].type);
+                this->pivot.set_type(types_present[0].type);
             }
             else{
-                this->desempate(types_present);
+                this->tiebreaker(types_present);
             }
         }
 
@@ -167,33 +166,32 @@ class list{
             }
         }
 
-        void desempate(std::vector<type_info> &types_present){
+        void tiebreaker(std::vector<type_info> &types_present){
             double* total_distances  = this->calculate_total_distances(types_present);
-            int closer = 0;
+            int closest = 0;
             for(int i = 1; i < types_present.size(); i++){
-                if(total_distances[i] < total_distances[closer]){
-                    closer = i;
+                if(total_distances[i] < total_distances[closest]){
+                    closest = i;
                 }
             }
-            std::cout<<total_distances[closer]<<". ";
-            this->pivo.set_type(types_present[closer].type);
+            this->pivot.set_type(types_present[closest].type);
 
             delete total_distances;
             
         }
 
         double* calculate_total_distances(std::vector<type_info> types_present){
-            int qtd_species = types_present.size();
-            double* total_distances = new double [qtd_species];
+            int qtd_types = types_present.size();
+            double* total_distances = new double [qtd_types];
 
-            for(int i = 0; i < qtd_species; i++){
+            for(int i = 0; i < qtd_types; i++){
                 total_distances[i] = 0;
             }
 
             for(int i = 0; i < this->my_list.size(); i++){
                 for(int j = 0; j < types_present.size(); j++){
                     if(this->my_list[i].get_type() == types_present[j].type){
-                        total_distances[j] += this->pivo.calculate_distance(my_list[i]);
+                        total_distances[j] += this->pivot.calculate_distance(my_list[i]);
                     }
                 }
             }
@@ -240,11 +238,11 @@ void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_p
     int diferente = 0, igual = 0;
     while(lines.size() > 0){
 
-        std::vector<double> thos_line = lines[0];
+        std::vector<double> this_line = lines[0];
         list lista(num_neighbours);
-        point new_point(thos_line);
+        point new_point(this_line);
         lines.erase(lines.begin());
-        lista.add_pivot(new_point);
+        lista.add_pivo(new_point);
 
         for(int i = 0; i < list_of_point.size(); i++){
             lista.add(list_of_point[i]);
@@ -253,12 +251,10 @@ void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_p
         list_of_point.push_back(lista.get_pivo());
 
         //matriz de confusão
-        if(lista.get_pivo().get_type() != thos_line[QTD_ATTRIBUTES]){
+        if(lista.get_pivo().get_type() != this_line[QTD_ATTRIBUTES]){
             diferente++;
-            //std::cout<<"d\t";
         }
         else{
-            //std::cout<<"i\t";
             igual++;
         }
 
@@ -274,7 +270,6 @@ void knn(int num_neighbours, int porcentage){
     random_shuffle(lines.begin(), lines.end());
 
     std::vector<point> list_of_point = train(lines, porcentage);
-        std::cout<<"iuggggggggggggggggggggg";
 
     test(lines, list_of_point, num_neighbours);
 

@@ -70,34 +70,34 @@ class list{
             return this->pivo;
         }
 
-        void add_pivo(point pivo){
+        void add_pivot(point pivo){
             this->pivo = pivo;
         }
 
-        void add(point new_neighbourd){
-            double distance = this->pivo.calculate_distance(new_neighbourd);
+        void add(point new_neighbour){
+            double distance = this->pivo.calculate_distance(new_neighbour);
             
             if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivo)){
                 if(this->my_list.size() == this->num_neighbours){
                     this->my_list.pop_back();
                 }
-                this->incert_ordered_in_list(new_neighbourd);
+                this->insert_ordered(new_neighbour);
             }
 
         }
 
-        void incert_ordered_in_list(point new_neighbourd){
+        void insert_ordered(point new_neighbour){
             int i = this->my_list.size()-1;
-            double new_distance = this->pivo.calculate_distance(new_neighbourd);
+            double new_distance = this->pivo.calculate_distance(new_neighbour);
             while(i >= 0){
                 if(new_distance > this->pivo.calculate_distance(this->my_list[i])){
-                   this->my_list.insert(this->my_list.begin() + i+1 ,new_neighbourd);
+                   this->my_list.insert(this->my_list.begin() + i+1 ,new_neighbour);
                    break;
                 }
                 i--;
             }
             if(i == -1){
-                this->my_list.insert(this->my_list.begin(), new_neighbourd);
+                this->my_list.insert(this->my_list.begin(), new_neighbour);
                 
             }
         }
@@ -244,7 +244,7 @@ void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_p
         list lista(num_neighbours);
         point new_point(thos_line);
         lines.erase(lines.begin());
-        lista.add_pivo(new_point);
+        lista.add_pivot(new_point);
 
         for(int i = 0; i < list_of_point.size(); i++){
             lista.add(list_of_point[i]);

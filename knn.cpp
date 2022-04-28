@@ -60,20 +60,19 @@ class point{
 class list{
     private:
         std::vector<point> my_list;
-        int num_neighbours;
+        int qtd_neighbours;
         point pivot;
 
     public:
-        list(int num_neighbours){
-            this->num_neighbours = num_neighbours;
+        list(int qtd_neighbours){
+            this->set_qtd_neighbours(qtd_neighbours);
         }
 
         list(){
-            
         }
 
-        void set_num_neighbours(int num_neighbours){
-            this->num_neighbours = num_neighbours;
+        void set_qtd_neighbours(int qtd_neighbours){
+            this->qtd_neighbours = qtd_neighbours;
         }
 
         point get_pivo(){
@@ -95,16 +94,13 @@ class list{
         }
 
         void add(point new_neighbour){
-            std::cout<<"a";
             double distance = new_neighbour.calculate_distance(this->pivot);
-            std::cout<<"a";
-            if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivot)){
-                if(this->my_list.size() == this->num_neighbours){
+            if(this->my_list.size() < this->qtd_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivot)){
+                if(this->my_list.size() == this->qtd_neighbours){
                     this->my_list.pop_back();
                 }
                 this->insert_ordered(new_neighbour);
             }
-            std::cout<<"b";
 
         }
 
@@ -256,7 +252,7 @@ std::vector<point> train(std::vector<std::vector<double>> &lines, int porcentage
     return list_of_point;
 }
 
-void get_best_list(list *my_lists, int num_neighbours, int qtd_threads){
+void get_best_list(list *my_lists, int qtd_neighbours, int qtd_threads){
     std::vector<point> best_list;
     point bests_points[qtd_threads];
 
@@ -264,7 +260,7 @@ void get_best_list(list *my_lists, int num_neighbours, int qtd_threads){
         bests_points[i] = my_lists[i].best_point();
     }
 
-    for(int i = 0; i < num_neighbours; i++){
+    for(int i = 0; i < qtd_neighbours; i++){
         int best_point_pos = 0;
         double best_distance = my_lists[0].get_pivo().calculate_distance(bests_points[best_point_pos]);
         for(int j = 1; j < qtd_threads; j++){
@@ -282,34 +278,29 @@ void get_best_list(list *my_lists, int num_neighbours, int qtd_threads){
 
 }
 
-void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_point, int num_neighbours){
-    int diferente = 0, igual = 0, qtd_threads = 4;
+void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_point, int qtd_neighbours, int qtd_threads){
+    int diferente = 0, igual = 0;
     while(lines.size() > 0){
-        std::cout<<"1"<<std::endl;
 
         std::vector<double> this_line = lines[0];
 
 
-        list lista[qtd_threads];
+        list* lista = new list [qtd_threads];
         point new_point(this_line);
         lines.erase(lines.begin());
 
         for(int i = 0; i < qtd_threads; i++){
-            lista[i].set_num_neighbours(num_neighbours);
+            lista[i].set_qtd_neighbours(qtd_neighbours);
             lista[i].add_pivot(new_point);
         }
 
         int i;
-        std::cout<<"x"<<std::endl;
-        #pragma omp parallel for private(i) shared(list_of_point) num_threads(qtd_threads)
+        #pragma omp parallel for private(i) shared(list_of_point, lista) num_threads(qtd_threads) schedule(static,1)
         for(i = 0; i < list_of_point.size(); i++){
-            std::cout<<"p";
-
             lista[i%qtd_threads].add(list_of_point[i]);
         }
-        std::cout<<"y";
 
-        get_best_list(lista, num_neighbours, qtd_threads);
+        get_best_list(lista, qtd_neighbours, qtd_threads);
         lista[0].define_type();
         list_of_point.push_back(lista[0].get_pivo());
 
@@ -327,20 +318,27 @@ void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_p
     std::cout<<"diferente: " << diferente << " igual: " << igual << std::endl;
 }
 
-void knn(int num_neighbours, int porcentage){
+void knn(int qtd_neighbours, int porcentage, int qtd_threads){
     std::vector<std::vector<double>> lines;
     readCsv(lines);
     random_shuffle(lines.begin(), lines.end());
 
     std::vector<point> list_of_point = train(lines, porcentage);
 
-    test(lines, list_of_point, num_neighbours);
+    test(lines, list_of_point, qtd_neighbours, qtd_threads);
 
 }
 
 int main(){
-    int start = time(NULL);
-    knn(120, 70);
-    std::cout<< time(NULL) - start << std::endl;
+    int qtd_qtd_neighbours = 8;
+    int qtd_neighbours[qtd_qtd_neighbours] = {80, 90, 100, 110, 120, 130, 140, 150};
+    int qtd_qtd_threads = 8;
+    for(int i=0; i < qtd_qtd_neighbours; i++){
+        for(int j = 0; j < qtd_qtd_threads; j++){
+            int start = time(NULL);
+            knn(qtd_neighbours[i], 70, j);
+            std::cout<< time(NULL) - start << std::endl;
+        }
+    }
     return 0;
 }

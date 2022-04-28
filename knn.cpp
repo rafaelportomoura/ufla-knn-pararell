@@ -6,6 +6,8 @@
 #include<fstream>
 #include <cstring>  
 #include "readCsv.cpp"
+#include <omp.h>
+#include <ctime>
 
 #define QTD_ATTRIBUTES 16
 
@@ -66,6 +68,14 @@ class list{
             this->num_neighbours = num_neighbours;
         }
 
+        list(){
+            
+        }
+
+        void set_num_neighbours(int num_neighbours){
+            this->num_neighbours = num_neighbours;
+        }
+
         point get_pivo(){
             return this->pivot;
         }
@@ -74,15 +84,27 @@ class list{
             this->pivot = pivot;
         }
 
+        point best_point(){
+            point retorno = this->my_list[0];
+            this->my_list.erase(this->my_list.begin());
+            return retorno;
+        }
+
+        void set_list(std::vector<point> my_list){
+            this->my_list = my_list;
+        }
+
         void add(point new_neighbour){
-            double distance = this->pivot.calculate_distance(new_neighbour);
-            
+            std::cout<<"a";
+            double distance = new_neighbour.calculate_distance(this->pivot);
+            std::cout<<"a";
             if(this->my_list.size() < this->num_neighbours || distance > this->my_list[this->my_list.size()-1].calculate_distance(pivot)){
                 if(this->my_list.size() == this->num_neighbours){
                     this->my_list.pop_back();
                 }
                 this->insert_ordered(new_neighbour);
             }
+            std::cout<<"b";
 
         }
 
@@ -234,24 +256,65 @@ std::vector<point> train(std::vector<std::vector<double>> &lines, int porcentage
     return list_of_point;
 }
 
+void get_best_list(list *my_lists, int num_neighbours, int qtd_threads){
+    std::vector<point> best_list;
+    point bests_points[qtd_threads];
+
+    for(int i = 0; i < qtd_threads; i++){
+        bests_points[i] = my_lists[i].best_point();
+    }
+
+    for(int i = 0; i < num_neighbours; i++){
+        int best_point_pos = 0;
+        double best_distance = my_lists[0].get_pivo().calculate_distance(bests_points[best_point_pos]);
+        for(int j = 1; j < qtd_threads; j++){
+            double comparson_distance = my_lists[0].get_pivo().calculate_distance(bests_points[j]);
+            if(comparson_distance < best_distance){
+                best_point_pos = j;
+                best_distance = comparson_distance;
+            }
+        }
+
+        best_list.push_back(bests_points[best_point_pos]);
+        bests_points[best_point_pos] = my_lists[best_point_pos].best_point();
+    }
+    my_lists[0].set_list(best_list);
+
+}
+
 void test(std::vector<std::vector<double>> &lines, std::vector<point> &list_of_point, int num_neighbours){
-    int diferente = 0, igual = 0;
+    int diferente = 0, igual = 0, qtd_threads = 4;
     while(lines.size() > 0){
+        std::cout<<"1"<<std::endl;
 
         std::vector<double> this_line = lines[0];
-        list lista(num_neighbours);
+
+
+        list lista[qtd_threads];
         point new_point(this_line);
         lines.erase(lines.begin());
-        lista.add_pivot(new_point);
 
-        for(int i = 0; i < list_of_point.size(); i++){
-            lista.add(list_of_point[i]);
+        for(int i = 0; i < qtd_threads; i++){
+            lista[i].set_num_neighbours(num_neighbours);
+            lista[i].add_pivot(new_point);
         }
-        lista.define_type();
-        list_of_point.push_back(lista.get_pivo());
+
+        int i;
+        std::cout<<"x"<<std::endl;
+        #pragma omp parallel for private(i) shared(list_of_point) num_threads(qtd_threads)
+        for(i = 0; i < list_of_point.size(); i++){
+            std::cout<<"p";
+
+            lista[i%qtd_threads].add(list_of_point[i]);
+        }
+        std::cout<<"y";
+
+        get_best_list(lista, num_neighbours, qtd_threads);
+        lista[0].define_type();
+        list_of_point.push_back(lista[0].get_pivo());
 
         //matriz de confusão
-        if(lista.get_pivo().get_type() != this_line[QTD_ATTRIBUTES]){
+        if(lista[0].get_pivo().get_type() != this_line[QTD_ATTRIBUTES]){
             diferente++;
         }
         else{
@@ -276,6 +339,8 @@ void knn(int num_neighbours, int porcentage){
 }
 
 int main(){
+    int start = time(NULL);
     knn(120, 70);
+    std::cout<< time(NULL) - start << std::endl;
     return 0;
 }

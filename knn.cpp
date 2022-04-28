@@ -334,7 +334,7 @@ int main(){
     int qtd_neighbours[qtd_qtd_neighbours] = {80, 90, 100, 110, 120, 130, 140, 150};
     int qtd_qtd_threads = 8;
     for(int i=0; i < qtd_qtd_neighbours; i++){
-        for(int j = 0; j < qtd_qtd_threads; j++){
+        for(int j = 1; j < qtd_qtd_threads; j++){
             int start = time(NULL);
             knn(qtd_neighbours[i], 70, j);
             std::cout<< time(NULL) - start << std::endl;
